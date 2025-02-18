@@ -4,7 +4,8 @@ import logging
 from bs4 import BeautifulSoup
 from dataclasses import dataclass, field
 
-
+class APIError(Exception): # TODO: move to errors.py file
+    ...
 
 # TODO: move logger to its file
 logger = logging.getLogger(__name__)
@@ -57,6 +58,11 @@ class Master:
     dates_true: list[str] = field(default_factory=list)
     times: list[str] = field(default_factory=list)
 
+    def __str__(self):
+        return f"Master № {self.id} | '{self.username}'"
+
+    def get_
+
 
 @dataclass
 class Service:
@@ -95,12 +101,12 @@ class Category:
     category_value: str
     services: list[Service] = field(default_factory=list)
 
-    def __post_init__(self):
-        self.__annotations__["id"] = "Уникальный идентификатор категории"
-
-
-class APIError(Exception): # TODO: move to errors.py file
-    ...
+    def __str__(self): # TODO: rename as "recur_print()"
+        splitter = "\n        " 
+        result_str = splitter
+        if self.services:
+            result_str += splitter.join(map(str, self.services))
+        return f"Category № {self.id} '{self.name}' ({len(self.services)})" + result_str
 
 @dataclass
 class Company:
@@ -130,7 +136,6 @@ class Company:
 
             self.name = company_data.get("name", "")
             self.description = company_data.get("name", "")
-            # self.categories = ... # can be parsed by get_categories()
 
         else:
             error_args = json_data.get("error")
@@ -138,8 +143,13 @@ class Company:
 
         return  None
 
-    def get_categories(self):
-        """ Collects categories for this company and saves in "categories" field. """
+    def get_categories(self, parse_services: bool = True):
+        """ 
+        Collects categories for this company and saves in "categories" field. 
+        
+        Arguments:
+            parse_services (bool): parse Service objects in same request.
+        """
         URL = "{base_url}/company_services/?array=1&company={company_id}"
         result_url = URL.format(base_url=Dikidi_API.URL, company_id=self.id)
         logger.debug(f"URL for parsing categories(company_id={self.id}: {result_url}")
@@ -147,14 +157,29 @@ class Company:
         json_data = Dikidi_API.get_data_from_api(result_url)
         categories = json_data.get("data").get("list")
         for category in categories:
-            print('===========================')
-            print(category.get("name"))
-            print('===========================')
+            cat = Category(
+                id=category.get("id", -1),
+                name=category.get("name", ""),
+                category_value=category.get("category_value")
+            )
+            if parse_services:
+                for service in category.get("services", []):
+                    serv = Service(
+                        id=service.get("id", -1),
+                        company_service_id=service.get("company_service_id", -1),
+                        name=service.get("name", ""),
+                        time=service.get("time", ""),
+                        service_value=service.get("service_value", ""),
+                        service_points=service.get("service_points", -1),
+                    )
+                    cat.services.append(serv)
+            self.categories.append(cat)
 
-        return categories
+        return self.categories
             
 
 class Dikidi_API:
+    """ Additional tools for DIKIDI API. """
     
     URL = "https://dikidi.net/ru/mobile/ajax/newrecord" 
 
@@ -174,16 +199,14 @@ class Dikidi_API:
             raise APIError(f"({error_args.get("code")}): {error_args.get("message")}")
 
 
-
-
-
 cp1 = Company(id=550001)
 cp1.collect_from_api()
 print(cp1)
 
 categories = cp1.get_categories()
 
-print(categories)
+for i in categories:
+    print(i)
 
 
 # class APISettings():
