@@ -75,10 +75,10 @@ class Master:
             list[Dates]: Список объектов Dates с датами и временем доступности мастера.
         """
         URL = "{base_url}/get_datetimes/?company_id={company_id}&service_id[]={service_id}&master_id={master_id}&with_first=1"
-        result_url = URL.format(base_url=Dikidi_API.URL, company_id=company_id, service_id=service_id, master_id=self.id)
+        result_url = URL.format(base_url=DikidiAPI.URL, company_id=company_id, service_id=service_id, master_id=self.id)
         logger.debug(f"URL для получения дат записи мастера (master_id={self.id}): {result_url}")
 
-        json_data = Dikidi_API.get_data_from_api(result_url)
+        json_data = DikidiAPI.get_data_from_api(result_url)
         if not json_data:
             logger.warning(f"Нет данных о доступных датах для мастера {self.id}")
             return []
@@ -133,10 +133,10 @@ class Service:
     
     def get_its_masters(self, company_id: int, max_amount: int = -1):
         URL = "{base_url}/service_info/?company_id={company_id}&service_id={service_id}&lang=ru"
-        result_url = URL.format(base_url=Dikidi_API.URL, company_id=company_id, service_id=self.id)
+        result_url = URL.format(base_url=DikidiAPI.URL, company_id=company_id, service_id=self.id)
         logger.debug(f"URL for parsing categories(company_id={self.id}: {result_url}")
 
-        json_data = Dikidi_API.get_data_from_api(result_url)
+        json_data = DikidiAPI.get_data_from_api(result_url)
 
         if not json_data:
             logger.warning(f"Нет данных о доступных мастерах для данной услуги {self.id}")
@@ -190,10 +190,10 @@ class Category:
             list[Service]: Список услуг, относящихся к категории.
         """
         URL = "{base_url}/company_services/?array=1&company={company_id}"
-        result_url = URL.format(base_url=Dikidi_API.URL, company_id=company_id)
+        result_url = URL.format(base_url=DikidiAPI.URL, company_id=company_id)
         logger.debug(f"URL для парсинга услуг категории (company_id={company_id}): {result_url}")
 
-        json_data = Dikidi_API.get_data_from_api(result_url)
+        json_data = DikidiAPI.get_data_from_api(result_url)
 
         if not json_data:
             logger.warning(f"Нет данных о доступных услугах для данной категории {self.id}")
@@ -298,10 +298,10 @@ class Company:
     def parse_company_info(self) -> None: 
         """ Collects company attributes from the API, except "categories". """
         URL =  "{base_url}/get_datetimes/?company_id={company_id}"
-        result_url = URL.format(base_url=Dikidi_API.URL, company_id=self.id)
+        result_url = URL.format(base_url=DikidiAPI.URL, company_id=self.id)
         logger.debug(f"URL for parsing company({self.id}): {result_url}")
 
-        json_data = Dikidi_API.get_data_from_api(result_url)
+        json_data = DikidiAPI.get_data_from_api(result_url)
 
         if not json_data:
             logger.warning(f"Нет данных о доступных категориях для данной компании {self.id}")
@@ -326,10 +326,10 @@ class Company:
             list[Category]: Список категорий.
         """
         URL = "{base_url}/company_services/?array=1&company={company_id}"
-        result_url = URL.format(base_url=Dikidi_API.URL, company_id=self.id)
+        result_url = URL.format(base_url=DikidiAPI.URL, company_id=self.id)
         logger.debug(f"URL для парсинга категорий (company_id={self.id}): {result_url}")
 
-        json_data = Dikidi_API.get_data_from_api(result_url)
+        json_data = DikidiAPI.get_data_from_api(result_url)
         
         if not json_data:
             logger.warning(f"Нет данных о доступных категориях для данной компании {self.id}")
@@ -357,7 +357,7 @@ class Company:
         return self.categories
 
 
-class Dikidi_API:
+class DikidiAPI:
     """ Additional tools for DIKIDI API. """
     
     URL = "https://dikidi.net/ru/mobile/ajax/newrecord" 
