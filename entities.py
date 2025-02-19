@@ -9,7 +9,7 @@ class APIError(Exception): # TODO: move to errors.py file
 
 # TODO: move logger to its file
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG) 
+logger.setLevel(logging.INFO) 
 
 console_handler = logging.StreamHandler(sys.stdout)
 console_handler.setLevel(logging.DEBUG)
@@ -57,11 +57,10 @@ class Master:
     time: int = 0
     dates_true: list[str] = field(default_factory=list)
     times: list[str] = field(default_factory=list)
+    dates: list[Dates] = field(default_factory=list)
 
     def __str__(self):
         return f"Master № {self.id} | '{self.username}'"
-
-    def get_
 
 
 @dataclass
@@ -83,6 +82,34 @@ class Service:
     time: int = 0
     service_value: str = ""
     service_points: float = 0.0
+    masters: list[str] = field(default_factory=list)
+
+    # commpany_id = ...- ? 
+
+    def __str__(self):
+        return f"Service № {self.id} | '{self.name}'"
+    
+    def get_its_masters(self, company_id: int, max_amount: int = -1):
+        URL = "{base_url}/service_info/?company_id={company_id}&service_id={service_id}&lang=ru"
+        result_url = URL.format(base_url=Dikidi_API.URL, company_id=company_id, service_id=self.id)
+        logger.debug(f"URL for parsing categories(company_id={self.id}: {result_url}")
+
+        json_data = Dikidi_API.get_data_from_api(result_url)
+        dirty_html = json_data.get("data", {}).get("view", "")
+        html = dirty_html.replace(r"\t", "").replace(r"\n", "")
+        soup = BeautifulSoup(html, "html.parser") # TODO: move
+        counter = 0
+        for master in soup.select("a.master"):
+            if counter >= max_amount:
+                break
+            counter += 1
+            mst = Master(
+                id=master.get("data-id", -1),
+                username=master.select_one("div.name").text
+            )
+            self.masters.append(mst)
+
+        return self.masters
 
 
 @dataclass
@@ -101,12 +128,19 @@ class Category:
     category_value: str
     services: list[Service] = field(default_factory=list)
 
-    def __str__(self): # TODO: rename as "recur_print()"
-        splitter = "\n        " 
-        result_str = splitter
-        if self.services:
-            result_str += splitter.join(map(str, self.services))
-        return f"Category № {self.id} '{self.name}' ({len(self.services)})" + result_str
+    def __str__(self):
+        return f"Category № {self.id} | '{self.name}'"
+
+    def get_its_services(self):
+        ...
+
+    # def __str__(self): # TODO: rename as "recur_print()"
+    #     splitter = "\n        " 
+    #     result_str = splitter
+    #     if self.services:
+    #         result_str += splitter.join(map(str, self.services))
+    #     return f"Category № {self.id} '{self.name}' ({len(self.services)})" + result_str
+
 
 @dataclass
 class Company:
@@ -123,6 +157,9 @@ class Company:
     name: str = ""
     description: str | None = ""
     categories: list[Category] = field(default_factory=list)
+
+    def __str__(self):
+        return f"Company № {self.id} | '{self.name}'"
 
     def collect_from_api(self) -> None: 
         """ Collects company attributes from the API, except "categories". """
@@ -143,7 +180,7 @@ class Company:
 
         return  None
 
-    def get_categories(self, parse_services: bool = True):
+    def get_its_categories(self, max_amount: int = -1, parse_services: bool = True):
         """ 
         Collects categories for this company and saves in "categories" field. 
         
@@ -156,13 +193,17 @@ class Company:
 
         json_data = Dikidi_API.get_data_from_api(result_url)
         categories = json_data.get("data").get("list")
+        counter = 0
         for category in categories:
+            if counter >= max_amount:
+                break
+            counter += 1
             cat = Category(
                 id=category.get("id", -1),
                 name=category.get("name", ""),
                 category_value=category.get("category_value")
             )
-            if parse_services:
+            if parse_services: # TODO: move away
                 for service in category.get("services", []):
                     serv = Service(
                         id=service.get("id", -1),
@@ -190,7 +231,15 @@ class Dikidi_API:
             Args:
                 url (str): url to parse
         """
-        response = requests.get(url)
+        failed = True
+        while failed:
+            try:
+                response = requests.get(url)
+            except requests.exceptions.SSLError:
+                failed = True
+                logger.info("SSLError occured.")
+            else:
+                failed = False
         json_data = response.json()
         if response.ok:
             return json_data
@@ -201,12 +250,19 @@ class Dikidi_API:
 
 cp1 = Company(id=550001)
 cp1.collect_from_api()
+
+
+categories = cp1.get_categories(max_amount=1)
+
+sep = "   "
 print(cp1)
-
-categories = cp1.get_categories()
-
-for i in categories:
-    print(i)
+for category in categories:
+    print(1 * sep, category)
+    for service in category.services:
+        service.get_its_masters(cp1.id, max_amount=1)
+        print(2 * sep, service)
+        for master in service.masters:
+            print(3 * sep, master)
 
 
 # class APISettings():
