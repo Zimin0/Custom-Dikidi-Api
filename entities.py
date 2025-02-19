@@ -100,7 +100,7 @@ class Service:
         soup = BeautifulSoup(html, "html.parser") # TODO: move
         counter = 0
         for master in soup.select("a.master"):
-            if counter >= max_amount:
+            if max_amount != -1 and counter >= max_amount:
                 break
             counter += 1
             mst = Master(
@@ -131,16 +131,43 @@ class Category:
     def __str__(self):
         return f"Category № {self.id} | '{self.name}'"
 
-    def get_its_services(self):
-        ...
+    def get_its_services(self, company_id: int, max_amount: int = -1):
+        """
+        Получает список услуг, относящихся к данной категории.
 
-    # def __str__(self): # TODO: rename as "recur_print()"
-    #     splitter = "\n        " 
-    #     result_str = splitter
-    #     if self.services:
-    #         result_str += splitter.join(map(str, self.services))
-    #     return f"Category № {self.id} '{self.name}' ({len(self.services)})" + result_str
+        Args:
+            company_id (int): Идентификатор компании.
+            max_amount (int): Максимальное количество услуг, которое нужно загрузить (-1 для загрузки всех).
 
+        Returns:
+            list[Service]: Список услуг, относящихся к категории.
+        """
+        URL = "{base_url}/company_services/?array=1&company={company_id}"
+        result_url = URL.format(base_url=Dikidi_API.URL, company_id=company_id)
+        logger.debug(f"URL для парсинга услуг категории (company_id={company_id}): {result_url}")
+
+        json_data = Dikidi_API.get_data_from_api(result_url)
+        category_data = json_data.get("data", {}).get("list", [])
+        
+        for category in category_data:
+            if category.get("id") == self.id:  # Найти соответствующую категорию
+                counter = 0
+                for service in category.get("services", []):
+                    if max_amount != -1 and counter >= max_amount:
+                        break
+                    counter += 1
+                    serv = Service(
+                        id=service.get("id", -1),
+                        company_service_id=service.get("company_service_id", -1),
+                        name=service.get("name", ""),
+                        time=service.get("time", 0),
+                        service_value=service.get("service_value", ""),
+                        service_points=service.get("service_points", 0.0),
+                    )
+                    self.services.append(serv)
+                break  # Выход из цикла, если нашли нужную категорию
+
+        return self.services
 
 @dataclass
 class Company:
@@ -160,8 +187,28 @@ class Company:
 
     def __str__(self):
         return f"Company № {self.id} | '{self.name}'"
+    
+    def recursive_print(self):
+        sep = "   "
+        print(self)
+        for category in self.categories:
+            print(1 * sep, category)
+            for service in category.services:
+                print(2 * sep, service)
+                for master in service.masters:
+                    print(3 * sep, master)
 
-    def collect_from_api(self) -> None: 
+    def parse_all_company_recursive(self, max_amount_of_any: int = -1):
+        self.parse_company_info()
+        self.categories = self.get_its_categories(max_amount=max_amount_of_any)
+        for category in self.categories:
+            category.get_its_services(self.id, max_amount=max_amount_of_any)
+            for service in category.services:
+                service.get_its_masters(self.id, max_amount=max_amount_of_any)
+                for master in service.masters:
+                    ...
+
+    def parse_company_info(self) -> None: 
         """ Collects company attributes from the API, except "categories". """
         URL =  "{base_url}/get_datetimes/?company_id={company_id}"
         result_url = URL.format(base_url=Dikidi_API.URL, company_id=self.id)
@@ -180,44 +227,43 @@ class Company:
 
         return  None
 
-    def get_its_categories(self, max_amount: int = -1, parse_services: bool = True):
+    def get_its_categories(self, max_amount: int = -1, parse_services: bool = False):
         """ 
-        Collects categories for this company and saves in "categories" field. 
+        Получает список категорий для данной компании и сохраняет в поле `categories`.
+
+        Args:
+            max_amount (int): Максимальное количество категорий (-1 для загрузки всех).
+            parse_services (bool): Нужно ли загружать услуги внутри категорий.
         
-        Arguments:
-            parse_services (bool): parse Service objects in same request.
+        Returns:
+            list[Category]: Список категорий.
         """
         URL = "{base_url}/company_services/?array=1&company={company_id}"
         result_url = URL.format(base_url=Dikidi_API.URL, company_id=self.id)
-        logger.debug(f"URL for parsing categories(company_id={self.id}: {result_url}")
+        logger.debug(f"URL для парсинга категорий (company_id={self.id}): {result_url}")
 
         json_data = Dikidi_API.get_data_from_api(result_url)
-        categories = json_data.get("data").get("list")
+        categories_data = json_data.get("data", {}).get("list", [])
         counter = 0
-        for category in categories:
-            if counter >= max_amount:
+
+        for category in categories_data:
+            if max_amount != -1 and counter >= max_amount:
                 break
             counter += 1
             cat = Category(
                 id=category.get("id", -1),
                 name=category.get("name", ""),
-                category_value=category.get("category_value")
+                category_value=category.get("category_value", ""),
             )
-            if parse_services: # TODO: move away
-                for service in category.get("services", []):
-                    serv = Service(
-                        id=service.get("id", -1),
-                        company_service_id=service.get("company_service_id", -1),
-                        name=service.get("name", ""),
-                        time=service.get("time", ""),
-                        service_value=service.get("service_value", ""),
-                        service_points=service.get("service_points", -1),
-                    )
-                    cat.services.append(serv)
+
             self.categories.append(cat)
 
+        if parse_services:
+            for category in self.categories:
+                category.get_its_services(self.id)
+
         return self.categories
-            
+
 
 class Dikidi_API:
     """ Additional tools for DIKIDI API. """
@@ -249,20 +295,12 @@ class Dikidi_API:
 
 
 cp1 = Company(id=550001)
-cp1.collect_from_api()
+cp1.parse_all_company_recursive(max_amount_of_any=2)
+cp1.recursive_print()
 
 
-categories = cp1.get_categories(max_amount=1)
 
-sep = "   "
-print(cp1)
-for category in categories:
-    print(1 * sep, category)
-    for service in category.services:
-        service.get_its_masters(cp1.id, max_amount=1)
-        print(2 * sep, service)
-        for master in service.masters:
-            print(3 * sep, master)
+
 
 
 # class APISettings():
