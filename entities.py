@@ -61,6 +61,48 @@ class Master:
 
     def __str__(self):
         return f"Master № {self.id} | '{self.username}'"
+    
+    def get_its_dates(self, company_id: int, service_id: int, max_amount: int = -1):
+        """
+        Получает доступные даты и время записи для данного мастера.
+
+        Args:
+            company_id (int): Идентификатор компании.
+            service_id (int): Идентификатор услуги.
+            max_amount (int): Максимальное количество дат, которое нужно загрузить (-1 для загрузки всех).
+
+        Returns:
+            list[Dates]: Список объектов Dates с датами и временем доступности мастера.
+        """
+        URL = "{base_url}/get_datetimes/?company_id={company_id}&service_id[]={service_id}&master_id={master_id}&with_first=1"
+        result_url = URL.format(base_url=Dikidi_API.URL, company_id=company_id, service_id=service_id, master_id=self.id)
+        logger.debug(f"URL для получения дат записи мастера (master_id={self.id}): {result_url}")
+
+        json_data = Dikidi_API.get_data_from_api(result_url)
+        if not json_data:
+            logger.warning(f"Нет данных о доступных датах для мастера {self.id}")
+            return []
+
+        all_dates = json_data.get("dates_true", [])
+        times_dict = json_data.get("times", {})
+        if times_dict: # can recieve a blank list
+            times_dict = times_dict.get(str(self.id), [])
+        first_date = json_data.get("first_date_true", "")
+        date_near = json_data.get("date_near", "")
+
+        if max_amount != -1:
+            all_dates = all_dates[:max_amount]
+            times_dict = times_dict[:max_amount]
+
+        dates_obj = Dates(
+            dates_true=all_dates,
+            date_near=date_near,
+            times=times_dict,
+            first_date_true=first_date
+        )
+        self.dates.append(dates_obj)
+
+        return self.dates
 
 
 @dataclass
@@ -82,7 +124,7 @@ class Service:
     time: int = 0
     service_value: str = ""
     service_points: float = 0.0
-    masters: list[str] = field(default_factory=list)
+    masters: list[Master] = field(default_factory=list)
 
     # commpany_id = ...- ? 
 
@@ -95,7 +137,12 @@ class Service:
         logger.debug(f"URL for parsing categories(company_id={self.id}: {result_url}")
 
         json_data = Dikidi_API.get_data_from_api(result_url)
-        dirty_html = json_data.get("data", {}).get("view", "")
+
+        if not json_data:
+            logger.warning(f"Нет данных о доступных мастерах для данной услуги {self.id}")
+            return None
+            
+        dirty_html = json_data.get("view", "")
         html = dirty_html.replace(r"\t", "").replace(r"\n", "")
         soup = BeautifulSoup(html, "html.parser") # TODO: move
         counter = 0
@@ -147,7 +194,12 @@ class Category:
         logger.debug(f"URL для парсинга услуг категории (company_id={company_id}): {result_url}")
 
         json_data = Dikidi_API.get_data_from_api(result_url)
-        category_data = json_data.get("data", {}).get("list", [])
+
+        if not json_data:
+            logger.warning(f"Нет данных о доступных услугах для данной категории {self.id}")
+            return None
+
+        category_data = json_data.get("list", [])
         
         for category in category_data:
             if category.get("id") == self.id:  # Найти соответствующую категорию
@@ -197,33 +249,68 @@ class Company:
                 print(2 * sep, service)
                 for master in service.masters:
                     print(3 * sep, master)
+                    for date in master.dates:
+                        print(4 * sep, date)
 
     def parse_all_company_recursive(self, max_amount_of_any: int = -1):
+        """
+        Последовательно загружает всю информацию о компании, включая категории, услуги, мастеров и их доступные даты.
+
+        Args:
+            max_amount_of_any (int): Максимальное количество элементов (категорий, услуг, мастеров, дат) для загрузки (-1 для загрузки всех).
+        """
+        logger.info(f"Начинаем парсинг компании (ID: {self.id})")
+        
         self.parse_company_info()
+
         self.categories = self.get_its_categories(max_amount=max_amount_of_any)
+        total_categories = len(self.categories)
+        logger.info(f"Загружено категорий: {total_categories}")
+
+        category_counter = 1
         for category in self.categories:
+            logger.info(f"({category_counter}/{total_categories}) Обрабатываем категорию: {category.name}")
             category.get_its_services(self.id, max_amount=max_amount_of_any)
+            category_counter += 1
+
+            total_services = len(category.services)
+            logger.info(f"  → Загружено услуг: {total_services}")
+
+            service_counter = 1
             for service in category.services:
+                logger.info(f"  ({service_counter}/{total_services}) Обрабатываем услугу: {service.name}")
                 service.get_its_masters(self.id, max_amount=max_amount_of_any)
+                service_counter += 1
+
+                total_masters = len(service.masters)
+                logger.info(f"    → Загружено мастеров: {total_masters}")
+
+                master_counter = 1
                 for master in service.masters:
-                    ...
+                    logger.info(f"    ({master_counter}/{total_masters}) Обрабатываем мастера: {master.username}")
+                    master.get_its_dates(self.id, service.id, max_amount=max_amount_of_any)
+                    master_counter += 1
+
+                    total_dates = len(master.dates)
+                    logger.info(f"      → Загружено дат: {total_dates}")
+
 
     def parse_company_info(self) -> None: 
         """ Collects company attributes from the API, except "categories". """
         URL =  "{base_url}/get_datetimes/?company_id={company_id}"
         result_url = URL.format(base_url=Dikidi_API.URL, company_id=self.id)
         logger.debug(f"URL for parsing company({self.id}): {result_url}")
-        response = requests.get(result_url)
-        json_data = response.json()
-        if response.ok:
-            company_data = json_data.get("data", {}).get("company", {})
 
-            self.name = company_data.get("name", "")
-            self.description = company_data.get("name", "")
+        json_data = Dikidi_API.get_data_from_api(result_url)
 
-        else:
-            error_args = json_data.get("error")
-            raise APIError(f"({error_args.get("code")}): {error_args.get("message")}")
+        if not json_data:
+            logger.warning(f"Нет данных о доступных категориях для данной компании {self.id}")
+            return None
+
+        company_data = json_data.get("company", {})
+
+        self.name = company_data.get("name", "")
+        self.description = company_data.get("name", "")
 
         return  None
 
@@ -243,7 +330,12 @@ class Company:
         logger.debug(f"URL для парсинга категорий (company_id={self.id}): {result_url}")
 
         json_data = Dikidi_API.get_data_from_api(result_url)
-        categories_data = json_data.get("data", {}).get("list", [])
+        
+        if not json_data:
+            logger.warning(f"Нет данных о доступных категориях для данной компании {self.id}")
+            return None
+        
+        categories_data = json_data.get("list", [])
         counter = 0
 
         for category in categories_data:
@@ -288,20 +380,14 @@ class Dikidi_API:
                 failed = False
         json_data = response.json()
         if response.ok:
-            return json_data
+            return json_data.get("data", {})
         else:
             error_args = json_data.get("error")
             raise APIError(f"({error_args.get("code")}): {error_args.get("message")}")
 
 
 cp1 = Company(id=550001)
-cp1.parse_all_company_recursive(max_amount_of_any=2)
-cp1.recursive_print()
+cp1.parse_all_company_recursive(max_amount_of_any=-1)
+# cp1.recursive_print()
 
-
-
-
-
-
-# class APISettings():
-#     ...
+print(1)
