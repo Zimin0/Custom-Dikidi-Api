@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 
-from entities.dates import Dates
+from entities.dates import Date
 from utils import DikidiAPI
 from logger_init import logger
 
@@ -23,7 +23,7 @@ class Master:
     time: int = 0
     dates_true: list[str] = field(default_factory=list)
     times: list[str] = field(default_factory=list)
-    dates: list[Dates] = field(default_factory=list)
+    dates: list[Date] = field(default_factory=list)
 
     def __str__(self):
         return f"Master № {self.id} | '{self.username}'"
@@ -50,22 +50,16 @@ class Master:
             return []
 
         all_dates = json_data.get("dates_true", [])
-        times_dict = json_data.get("times", {})
-        if times_dict: # can recieve a blank list
-            times_dict = times_dict.get(str(self.id), [])
-        first_date = json_data.get("first_date_true", "")
-        date_near = json_data.get("date_near", "")
 
         if max_amount != -1:
             all_dates = all_dates[:max_amount]
-            times_dict = times_dict[:max_amount]
 
-        dates_obj = Dates(
-            dates_true=all_dates,
-            date_near=date_near,
-            times=times_dict,
-            first_date_true=first_date
-        )
-        self.dates.append(dates_obj)
+        for date in all_dates:
+            self.dates.append(
+                Date(
+                    date_string=date, 
+                    times=[]
+                )
+            )
 
         return self.dates

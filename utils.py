@@ -1,6 +1,7 @@
 import requests
 
 from logger_init import logger
+from errors import APIError
 
 
 class DikidiAPI:

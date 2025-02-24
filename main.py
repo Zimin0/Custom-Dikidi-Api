@@ -1,6 +1,8 @@
 import sys
 from entities.companies import Company
 
+from logger_init import logger
+
 def select_option(options, prompt="Выберите вариант"):
     """Отображает список вариантов и запрашивает выбор пользователя."""
     if not options:
@@ -20,7 +22,7 @@ def select_option(options, prompt="Выберите вариант"):
             print("Ошибка: Введите число.")
 
 def main():
-    company_id = input("Введите ID компании: ")
+    company_id = input("Введите ID компании: ") or "550001"
     
     # Создание объекта компании
     company = Company(id=int(company_id))
@@ -71,13 +73,30 @@ def main():
     # Получение доступных дат
     print("\nЗагружаем доступные даты...")
     dates = selected_master.get_its_dates(company.id, selected_service.id)
+    logger.debug(f"{dates=}")
     if not dates:
         print("Доступных дат нет.")
         sys.exit(1)
+    
+    selected_date = select_option(dates, "Выберите дату")
+    if not selected_date:
+        sys.exit(1)
 
-    print("\nДоступные даты:")
-    for date in dates[0].dates_true:
-        print(f" - {date}")
+    print(f"\nВыбрана дата: {selected_date}")
+    
+    # Получение доступных временных интервалов
+    print("\nЗагружаем доступные временные интервалы...")
+    times = selected_date.get_its_times(company.id, selected_service.id, selected_master.id)
+    if not times:
+        print("Нет доступных временных интервалов.")
+        sys.exit(1)
+
+    selected_time = select_option(times, "Выберите время")
+    if not selected_time:
+        sys.exit(1)
+
+    print(f"\nВыбран временной интервал: {selected_time}")
+    print("\nБронирование завершено!\n")
 
 if __name__ == "__main__":
     main()
