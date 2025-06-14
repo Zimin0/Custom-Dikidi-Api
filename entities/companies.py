@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 
 from entities.categories import Category
-from utils import DikidiAPI
+from utils import DikidiApi
 from logger_init import logger
 
 
@@ -58,7 +58,7 @@ class Company:
             category_counter += 1
 
             total_services = len(category.services)
-            logger.info(f"  → Загружено услуг: {total_services}")
+            logger.info(f"  --> Загружено услуг: {total_services}")
 
             service_counter = 1
             for service in category.services:
@@ -67,7 +67,7 @@ class Company:
                 service_counter += 1
 
                 total_masters = len(service.masters)
-                logger.info(f"    → Загружено мастеров: {total_masters}")
+                logger.info(f"    --> Загружено мастеров: {total_masters}")
 
                 master_counter = 1
                 for master in service.masters:
@@ -76,16 +76,16 @@ class Company:
                     master_counter += 1
 
                     total_dates = len(master.dates)
-                    logger.info(f"      → Загружено дат: {total_dates}")
+                    logger.info(f"      --> Загружено дат: {total_dates}")
 
 
     def parse_company_info(self) -> None: 
         """ Collects company attributes from the API, except "categories". """
         URL =  "{base_url}/get_datetimes/?company_id={company_id}"
-        result_url = URL.format(base_url=DikidiAPI.URL, company_id=self.id)
+        result_url = URL.format(base_url=DikidiApi.URL, company_id=self.id)
         logger.debug(f"URL for parsing company({self.id}): {result_url}")
 
-        json_data = DikidiAPI.get_data_from_api(result_url)
+        json_data = DikidiApi.get_data_from_api(result_url)
 
         if not json_data:
             logger.warning(f"Нет данных о доступных категориях для данной компании {self.id}")
@@ -96,7 +96,7 @@ class Company:
         self.name = company_data.get("name", "")
         self.description = company_data.get("name", "")
 
-        return  None
+        return None
 
     def get_its_categories(self, max_amount: int = -1, parse_services: bool = False):
         """ 
@@ -110,10 +110,10 @@ class Company:
             list[Category]: Список категорий.
         """
         URL = "{base_url}/company_services/?array=1&company={company_id}"
-        result_url = URL.format(base_url=DikidiAPI.URL, company_id=self.id)
+        result_url = URL.format(base_url=DikidiApi.URL, company_id=self.id)
         logger.debug(f"URL для парсинга категорий (company_id={self.id}): {result_url}")
 
-        json_data = DikidiAPI.get_data_from_api(result_url)
+        json_data = DikidiApi.get_data_from_api(result_url)
         
         if not json_data:
             logger.warning(f"Нет данных о доступных категориях для данной компании {self.id}")

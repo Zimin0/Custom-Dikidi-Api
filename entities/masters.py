@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 
 from entities.dates import Date
-from utils import DikidiAPI
+from utils import DikidiApi
 from logger_init import logger
 
 @dataclass
@@ -41,10 +41,10 @@ class Master:
             list[Dates]: Список объектов Dates с датами и временем доступности мастера.
         """
         URL = "{base_url}/get_datetimes/?company_id={company_id}&service_id[]={service_id}&master_id={master_id}&with_first=1"
-        result_url = URL.format(base_url=DikidiAPI.URL, company_id=company_id, service_id=service_id, master_id=self.id)
+        result_url = URL.format(base_url=DikidiApi.URL, company_id=company_id, service_id=service_id, master_id=self.id)
         logger.debug(f"URL для получения дат записи мастера (master_id={self.id}): {result_url}")
 
-        json_data = DikidiAPI.get_data_from_api(result_url)
+        json_data = DikidiApi.get_data_from_api(result_url)
         if not json_data:
             logger.warning(f"Нет данных о доступных датах для мастера {self.id}")
             return []

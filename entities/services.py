@@ -2,7 +2,7 @@ from dataclasses import dataclass, field
 from bs4 import BeautifulSoup
 
 from entities.masters import Master
-from utils import DikidiAPI
+from utils import DikidiApi
 from logger_init import logger
 
 @dataclass
@@ -33,10 +33,10 @@ class Service:
     
     def get_its_masters(self, company_id: int, max_amount: int = -1):
         URL = "{base_url}/service_info/?company_id={company_id}&service_id={service_id}&lang=ru"
-        result_url = URL.format(base_url=DikidiAPI.URL, company_id=company_id, service_id=self.id)
+        result_url = URL.format(base_url=DikidiApi.URL, company_id=company_id, service_id=self.id)
         logger.debug(f"URL for parsing categories(company_id={self.id}: {result_url}")
 
-        json_data = DikidiAPI.get_data_from_api(result_url)
+        json_data = DikidiApi.get_data_from_api(result_url)
 
         if not json_data:
             logger.warning(f"Нет данных о доступных мастерах для данной услуги {self.id}")

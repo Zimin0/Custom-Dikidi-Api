@@ -2,3 +2,4 @@ api/
 myvenv/
 trash/
 .env
+tests/

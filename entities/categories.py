@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 
 from entities.services import Service
-from utils import DikidiAPI
+from utils import DikidiApi
 from logger_init import logger
 
 @dataclass
@@ -35,10 +35,10 @@ class Category:
             list[Service]: Список услуг, относящихся к категории.
         """
         URL = "{base_url}/company_services/?array=1&company={company_id}"
-        result_url = URL.format(base_url=DikidiAPI.URL, company_id=company_id)
+        result_url = URL.format(base_url=DikidiApi.URL, company_id=company_id)
         logger.debug(f"URL для парсинга услуг категории (company_id={company_id}): {result_url}")
 
-        json_data = DikidiAPI.get_data_from_api(result_url)
+        json_data = DikidiApi.get_data_from_api(result_url)
 
         if not json_data:
             logger.warning(f"Нет данных о доступных услугах для данной категории {self.id}")

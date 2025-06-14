@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from utils import DikidiAPI
+from utils import DikidiApi
 from logger_init import logger
 
 @dataclass
@@ -34,10 +34,10 @@ class Date:
                f"?company_id={company_id}&date={date}&service_id%5B%5D={service_id}"
                f"&master_id={master_id}&with_first=false&day_month=")
 
-        result_url = URL.format(base_url=DikidiAPI.URL, company_id=company_id, date=date, service_id=service_id, master_id=master_id)
+        result_url = URL.format(base_url=DikidiApi.URL, company_id=company_id, date=date, service_id=service_id, master_id=master_id)
 
         logger.debug(f"Запрос доступных временных слотов: {result_url}")
-        json_data = DikidiAPI.get_data_from_api(result_url)
+        json_data = DikidiApi.get_data_from_api(result_url)
 
         if not json_data:
             logger.warning(f"Нет данных о доступных местах для записи к этому мастеру ({master_id}).")
