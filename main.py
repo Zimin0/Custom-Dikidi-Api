@@ -32,7 +32,7 @@ def main():
     print(f"Компания: {company.name}")
     
     # Получение списка категорий
-    print("\nЗагружаем категории...")
+    print("Загружаем категории...")
     categories = company.get_its_categories()
     if not categories:
         print("Категории не найдены.")
@@ -45,7 +45,7 @@ def main():
     print(f"Выбрана категория: {selected_category.name}")
 
     # Получение списка сервисов
-    print("\nЗагружаем услуги...")
+    print("Загружаем услуги...")
     services = selected_category.get_its_services(company.id)
     if not services:
         print("Услуги не найдены.")
@@ -58,7 +58,7 @@ def main():
     print(f"Выбрана услуга: {selected_service.name}")
 
     # Получение списка мастеров
-    print("\nЗагружаем мастеров...")
+    print("Загружаем мастеров...")
     masters = selected_service.get_its_masters(company.id)
     if not masters:
         print("Мастера не найдены.")
@@ -71,7 +71,7 @@ def main():
     print(f"Выбран мастер: {selected_master.username}")
 
     # Получение доступных дат
-    print("\nЗагружаем доступные даты...")
+    print("Загружаем доступные даты...")
     dates = selected_master.get_its_dates(company.id, selected_service.id)
     logger.debug(f"{dates=}")
     if not dates:
@@ -85,7 +85,7 @@ def main():
     print(f"Выбрана дата: {selected_date}")
     
     # Получение доступных временных интервалов
-    print("\nЗагружаем доступные временные интервалы...")
+    print("Загружаем доступные временные интервалы...")
     times = selected_date.get_its_times(company.id, selected_service.id, selected_master.id)
     if not times:
         print("Нет доступных временных интервалов.")
