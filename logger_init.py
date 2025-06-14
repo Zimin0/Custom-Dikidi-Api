@@ -2,10 +2,10 @@ import sys
 import logging
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO) 
+logger.setLevel(logging.DEBUG) 
 
 console_handler = logging.StreamHandler(sys.stdout)
-console_handler.setLevel(logging.INFO)
+console_handler.setLevel(logging.DEBUG)
 
 formatter = logging.Formatter("[%(asctime)s] [%(levelname)s] %(message)s", "%Y-%m-%d %H:%M:%S")
 console_handler.setFormatter(formatter)

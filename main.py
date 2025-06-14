@@ -22,14 +22,14 @@ def select_option(options, prompt="Выберите вариант"):
             print("Ошибка: Введите число.")
 
 def main():
-    company_id = input("Введите ID компании: ") or "550001"
+    company_id = input("Введите ID компании: ") or "1554154" #or "550001"
     
     # Создание объекта компании
     company = Company(id=int(company_id))
-    print("\nПарсим информацию о компании...")
+    print(f"Парсим информацию о компании с id '{company_id}'...")
     company.parse_company_info()
 
-    print(f"\nКомпания: {company.name}")
+    print(f"Компания: {company.name}")
     
     # Получение списка категорий
     print("\nЗагружаем категории...")
@@ -42,7 +42,7 @@ def main():
     if not selected_category:
         sys.exit(1)
 
-    print(f"\nВыбрана категория: {selected_category.name}")
+    print(f"Выбрана категория: {selected_category.name}")
 
     # Получение списка сервисов
     print("\nЗагружаем услуги...")
@@ -55,7 +55,7 @@ def main():
     if not selected_service:
         sys.exit(1)
 
-    print(f"\nВыбрана услуга: {selected_service.name}")
+    print(f"Выбрана услуга: {selected_service.name}")
 
     # Получение списка мастеров
     print("\nЗагружаем мастеров...")
@@ -68,7 +68,7 @@ def main():
     if not selected_master:
         sys.exit(1)
 
-    print(f"\nВыбран мастер: {selected_master.username}")
+    print(f"Выбран мастер: {selected_master.username}")
 
     # Получение доступных дат
     print("\nЗагружаем доступные даты...")
@@ -82,7 +82,7 @@ def main():
     if not selected_date:
         sys.exit(1)
 
-    print(f"\nВыбрана дата: {selected_date}")
+    print(f"Выбрана дата: {selected_date}")
     
     # Получение доступных временных интервалов
     print("\nЗагружаем доступные временные интервалы...")
@@ -95,8 +95,8 @@ def main():
     if not selected_time:
         sys.exit(1)
 
-    print(f"\nВыбран временной интервал: {selected_time}")
-    print("\nБронирование завершено!\n")
+    print(f"Выбран временной интервал: {selected_time}")
+    print("\Просмотр завершен!\n")
 
 if __name__ == "__main__":
     main()
