@@ -14,14 +14,14 @@ class Master:
         username (str): Имя мастера (или название лабораторной работы).
         service_name (str): Название услуги, которую выполняет мастер.
         time (int): Длительность услуги у мастера в минутах.
-        dates_true (list[str]): Доступные даты для записи к мастеру.
+        dates_true (list[str]): Доступные даты для записи к мастеру. Ключ из API.
         times (list[str]): Доступные временные интервалы для записи.
     """
     id: int
     username: str
     service_name: str = ""
-    time: int = 0
-    dates_true: list[str] = field(default_factory=list)
+    time: int = 0 # TODO: rename as 'duration'
+    dates_true: list[str] = field(default_factory=list) # TODO: rename as 'free_dates'
     times: list[str] = field(default_factory=list)
     dates: list[Date] = field(default_factory=list)
 

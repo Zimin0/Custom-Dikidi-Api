@@ -1,8 +1,20 @@
+from dataclasses import dataclass
 import requests
 
 from logger_init import logger
 from errors import APIError
 
+
+@dataclass
+class RecordData:
+    """ Class to store data for creating new record in DIKIDI. """
+    company_id: int
+    master_id: int
+    service_id: int
+    time_slot: str
+    phone: str
+    first_name: str
+    last_name: str
 
 class DikidiApi:
     """ Additional tools for DIKIDI API. """
@@ -31,4 +43,7 @@ class DikidiApi:
         else:
             error_args = json_data.get("error")
             raise APIError(f"({error_args.get("code")}): {error_args.get("message")}")
+    
+    # @staticmethod
+    # def create_record(data: RecordData) -> bool:
 
