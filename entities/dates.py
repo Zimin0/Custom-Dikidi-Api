@@ -1,7 +1,7 @@
 from datetime import datetime
 from dataclasses import dataclass, field
 
-from datetime_slot import DateTimeSlot
+from entities.datetime_slot import DateTimeSlot
 
 @dataclass
 class Date:
@@ -10,12 +10,15 @@ class Date:
     
     Object will be parsed from ""times":{"1223441":["2025-07-03 12:00:00","2025-07-03 14:00:00"]}" API response.
     
-     Attributes:
+    Attributes:
         * date_string (str): Calendar date in ISO format ``YYYY-MM-DD`` (for example, ``"2025-07-03"``).
         * slots (list[DateTimeSlot]): Free time slots that can be booked on date_string.
     """
 
+    # these attributes will be parsed with parent API entity (Master).
     date_string: str 
+    
+    # these attributes must be collected separately.
     slots: list[DateTimeSlot] = field(default_factory=list)
 
     def __post_init__(self):
