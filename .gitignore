@@ -3,3 +3,5 @@ myvenv/
 trash/
 .env
 tests/
+__pycache__/*
+*.pyc
