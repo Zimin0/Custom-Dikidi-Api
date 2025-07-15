@@ -18,7 +18,7 @@ class Master:
         dates (list[Date]): Detailed information for each available date (should be fetched separately).
     """
     
-    # these attributes will be parsed with parent API entity (Service).
+    # these attributes will be parsed with parent API entity (Master).
     id: int
     name: str                                           # 'username' in API
     service_name: str = ""

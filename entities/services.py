@@ -29,7 +29,7 @@ class Service:
     cost: int                   # 'cost' or 'price' in API
     name: str                   # 'name' in API
     duration: int = 0           # 'time' in API
-    service_value: str = ""     # duplicate 'name', 'service_value' in value
+    service_value: str = ""     # duplicates 'name' field, 'service_value' in value
     service_points: float = 0.0 # 'service_points' in API
 
     # these attributes must be collected separately.
