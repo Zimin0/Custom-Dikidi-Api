@@ -21,7 +21,7 @@ class Master:
     # these attributes will be parsed with parent API entity (Master).
     id: int
     name: str                                           # 'username' in API
-    service_name: str = ""
+    service_name: str = ""                              # 'service_name' in API
     duration: int = 0                                   # 'time' in API
     free_dates: list[str] = field(default_factory=list) # 'dates_true' in API
     
