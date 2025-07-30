@@ -1,19 +1,8 @@
-from abc import ABC, abstractmethod
-
 from utils import DikidiApiClient 
 from entities.dates import Date 
 from entities.datetime_slot import DateTimeSlot
 from logger_init import logger
-
-class IParsingService(ABC):
-    """ Interface for producing various entities's parsing services. """
-
-    def __init__(self, client: DikidiApiClient):
-        self.client = client
-
-    @abstractmethod
-    def get_all_objects(self):
-        raise NotImplementedError
+from services.interfaces import IParsingService
 
 class ParsingDatetimeService(IParsingService):
     """ Requests the available time intervals for the specified date for the certain "master" and "service". """
