@@ -9,7 +9,7 @@ class ParsingDatesService(IParsingService):
     can still be booked for the selected *service*. 
     """
 
-    def get_all_objects(self, company_id: int, service_id: int, master_id: int, amount_of_dates: int = -1) -> list[Date]:
+    def get_all_objects(self, company_id: int, service_id: int, master_id: int, amount: int = -1) -> list[Date]:
         """
         Return all available booking dates for master's `master_id`.
 
@@ -17,7 +17,7 @@ class ParsingDatesService(IParsingService):
             company_id (int): Unique identifier of the company inside Dikidi.
             service_id (int): ID of the service the customer wants to book.
             master_id (int): ID of the staff member ("master").
-            amount_of_dates (int, optional): Maximum number of dates to return.
+            amount (int, optional): Maximum number of dates to return.
                 Use ``-1`` (default) to return all available dates.
 
         Returns:
@@ -36,8 +36,8 @@ class ParsingDatesService(IParsingService):
 
         all_dates = json_data.get("dates_true", [])
 
-        if amount_of_dates != -1:
-            all_dates = all_dates[:amount_of_dates]
+        if amount != -1:
+            all_dates = all_dates[:amount]
 
         for date in all_dates:
             result_dates.append(
@@ -53,7 +53,7 @@ if __name__ == "__main__":
         company_id=1129503,
         service_id=13765992,
         master_id=2483899,
-        amount_of_dates=-1
+        amount=-1
     )
     print(f"{len(dates)} свободных дат.")
     print(dates)

@@ -1,5 +1,4 @@
 from dataclasses import dataclass, field
-from bs4 import BeautifulSoup
 
 from entities.masters import Master
 from utils import DikidiApi
@@ -37,30 +36,3 @@ class Service:
 
     def __str__(self):
         return f"Service № {self.id} | '{self.name}'"
-    
-    # def get_its_masters(self, company_id: int, max_amount: int = -1):
-    #     URL = "{base_url}/service_info/?company_id={company_id}&service_id={service_id}&lang=ru"
-    #     result_url = URL.format(base_url=DikidiApi.URL, company_id=company_id, service_id=self.id)
-    #     logger.debug(f"URL for parsing categories(company_id={self.id}: {result_url}")
-
-    #     json_data = DikidiApi.get_data_from_api(result_url)
-
-    #     if not json_data:
-    #         logger.warning(f"Нет данных о доступных мастерах для данной услуги {self.id}")
-    #         return None
-            
-    #     dirty_html = json_data.get("view", "")
-    #     html = dirty_html.replace(r"\t", "").replace(r"\n", "")
-    #     soup = BeautifulSoup(html, "html.parser") # TODO: move
-    #     counter = 0
-    #     for master in soup.select("a.master"):
-    #         if max_amount != -1 and counter >= max_amount:
-    #             break
-    #         counter += 1
-    #         mst = Master(
-    #             id=master.get("data-id", -1),
-    #             username=master.select_one("div.name").text
-    #         )
-    #         self.masters.append(mst)
-
-    #     return self.masters

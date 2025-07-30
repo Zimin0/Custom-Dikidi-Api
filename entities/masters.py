@@ -1,8 +1,6 @@
 from dataclasses import dataclass, field
 
 from entities.dates import Date
-from utils import DikidiApi
-from logger_init import logger
 
 @dataclass
 class Master:
@@ -24,10 +22,10 @@ class Master:
     service_name: str = ""                              # 'service_name' in API
     duration: int = 0                                   # 'time' in API
     free_dates: list[str] = field(default_factory=list) # 'dates_true' in API
+    # TODO: add count rating and post fields https://dikidi.ru/ru/profile/be_see_1129503
     
     # these attributes must be collected separately.
     dates: list[Date] = field(default_factory=list)
 
     def __str__(self):
         return f"Master № {self.id} | '{self.username}'"
-
