@@ -30,4 +30,4 @@ class Master:
 
     def __str__(self):
         return f"Master № {self.id} | '{self.username}'"
-    
+

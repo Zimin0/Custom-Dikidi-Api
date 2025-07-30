@@ -8,5 +8,5 @@ class IParsingService(ABC):
         self.client = client
 
     @abstractmethod
-    def get_all_objects(self):
+    def get_all_objects(self) -> list:
         raise NotImplementedError

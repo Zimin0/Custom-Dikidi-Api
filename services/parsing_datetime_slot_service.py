@@ -1,13 +1,13 @@
 from utils import DikidiApiClient 
+from logger_init import logger
 from entities.dates import Date 
 from entities.datetime_slot import DateTimeSlot
-from logger_init import logger
 from services.interfaces import IParsingService
 
-class ParsingDatetimeService(IParsingService):
+class ParsingSlotsService(IParsingService):
     """ Requests the available time intervals for the specified date for the certain "master" and "service". """
     
-    def get_all_objects(self, date: Date, company_id: int, service_id: int,  master_id: int):
+    def get_all_objects(self, date: Date, company_id: int, service_id: int,  master_id: int) -> list[DateTimeSlot]:
         """
         Args:
             date (Date): date object
@@ -18,7 +18,7 @@ class ParsingDatetimeService(IParsingService):
         Returns:
             list[str]: List of available "DateTimeSlots". 
         """
-        result_datetimes: list[DateTimeSlot] = [] 
+        result_datetimes = [] 
         
         URL = ("{base_url}/get_datetimes/"
                f"?company_id={company_id}&date={date.date_string}&service_id%5B%5D={service_id}"
@@ -44,7 +44,7 @@ class ParsingDatetimeService(IParsingService):
 
 if __name__ == "__main__":
     dkd = DikidiApiClient()
-    pdtslot = ParsingDatetimeService(client=dkd)
+    pdtslot = ParsingSlotsService(client=dkd)
     slots = pdtslot.get_all_objects(
         date=Date("2025-08-10"),
         company_id=1129503,
