@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 
 from entities.masters import Master
-from utils import DikidiApi
+from utils import DikidiApiClient
 from logger_init import logger
 
 @dataclass
