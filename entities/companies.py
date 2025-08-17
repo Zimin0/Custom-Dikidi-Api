@@ -1,15 +1,45 @@
 from dataclasses import dataclass, field
 
 from entities.categories import Category
-from utils import DikidiApi
 from logger_init import logger
 
 @dataclass
 class InnerSchedule:
     """ Schedule structure for inner usage inside 'Company' class."""
-    day: str
-    work_from: str
-    work_to: str
+    day:        str | None
+    work_from:  str | None
+    work_to:    str | None
+
+    @staticmethod
+    def parse(value: list[dict]) -> "InnerSchedule":
+        """Create InnerSchedule's object from API response, f.e. - [{'day': 'Пн—Вс', 'work_from': '10:00', 'work_to': '22:00'}]. """
+
+        if len(value) != 0:
+            value = value.pop(0)
+        else:
+            value = {}
+            logger.debug(f"List for InnerSchedule creation should not be empty, got: '{value}'.")
+
+        day = value.get("day")
+        work_from = value.get("work_from")
+        work_to = value.get("work_to")
+        
+        object = InnerSchedule(
+            day,
+            work_from,
+            work_to
+        )
+
+        return object
+    
+@dataclass
+class ShortCompany:
+    """
+    Shortened version of Company class.
+    Can be used for faster uploading.
+    """
+    id: int
+    name: str
 
 @dataclass
 class Company:
@@ -29,12 +59,14 @@ class Company:
 
     # these attributes will be parsed with parent API entity (Company).
     id: int                                         # 'id' in API
-    name: str = ""                                  # 'name' in API
+    name: str                                       # 'name' in API
     description: str                                # 'description' in API
+    image: str                                      # 'image' in API
     address: str                                    # 'address' in API
-    phones: list[str] = field(default_factory=list) # 'phones' in API
     currency_abbr: str                              # 'currency_abbr' in API
     schedule: InnerSchedule                         # 'schedule' in API
+    currency_abbr: str                              # 'currency_abbr' in API
+    phones: list[str] = field(default_factory=list) # 'phones' in API
 
     # these attributes must be collected separately.
     categories: list[Category] = field(default_factory=list)
