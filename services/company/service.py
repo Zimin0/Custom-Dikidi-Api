@@ -1,3 +1,4 @@
+import re
 import requests
 from bs4 import BeautifulSoup
 
@@ -117,7 +118,55 @@ class CompanyService:
             result_companies.append(detailed_company)
         
         return result_companies
+    
+    def get_by_link(self, link: str) -> Company | None:
+        """
+        Get company by link to its main page.
+        
+        Possible link formats:
+        * https://dikidi.ru/ru/profile/zoosalon_foks_kommuny_59_511357
+        * https://dikidi.ru/ru/profile/511357
+        * https://dikidi.ru/ru/511357?p=0.pi
+        * https://dikidi.ru/ru/511357/
+        * https://dikidi.net/en/511357
+        """
+        result_company_id = None
 
+        parts = re.split(r'[?/]', link)
+
+        # Process 2 cases: 
+        # https://dikidi.ru/ru/profile/zoosalon_foks_kommuny_59_511357
+        # https://dikidi.ru/ru/profile/511357
+        if "profile" in parts:
+            ind = parts.index("profile")
+            possible_id = parts[ind + 1]
+            try:
+                possible_id_int = int(possible_id)
+            except ValueError:
+                possible_id_splitted = possible_id.split('_')[-1]
+                try:
+                    possible_id_splitted_int = int(possible_id_splitted)
+                except ValueError as e:
+                    raise ValueError(f"Provided unprocessible copany link: {link}. {e}")
+                else:
+                    result_company_id = possible_id_splitted_int
+            else:
+                result_company_id = possible_id_int
+
+        if result_company_id is not None: # return if ID was successfully parsed
+            logger.debug("Not a 'profile' case. Continue parsing link.")
+            return self.get_by_id(result_company_id)
+
+        # Other cases:
+        for part in parts: # goes from left to right and search for the firts INT
+            try:
+                int_part = int(part)
+            except ValueError:
+                continue
+            else: 
+                result_company_id = int_part
+
+        return self.get_by_id(result_company_id)
 
 if __name__ == "__main__":
     dikidi_client = DikidiApiClient()

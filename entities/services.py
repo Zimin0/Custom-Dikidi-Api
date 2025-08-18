@@ -34,5 +34,5 @@ class Service:
     # these attributes must be collected separately.
     masters: list[Master] = field(default_factory=list)
 
-    def __str__(self):
+    def print_short(self):
         return f"Service № {self.id} | '{self.name}'"

@@ -4,7 +4,6 @@ import requests
 from logger_init import logger
 from errors import APIError
 
-
 # @dataclass
 # class RecordData:
 #     """ Class to store data for creating new record in DIKIDI. """

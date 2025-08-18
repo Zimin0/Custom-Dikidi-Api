@@ -71,7 +71,7 @@ class Company:
     # these attributes must be collected separately.
     categories: list[Category] = field(default_factory=list)
 
-    def __str__(self):
+    def print_short(self):
         return f"Company № {self.id} | '{self.name}'"
     
     # def recursive_print(self):

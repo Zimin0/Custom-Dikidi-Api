@@ -6,7 +6,7 @@ from entities.services import Service
 class ParsingServicesService(IParsingService):
     """Requests the available services for the specified category in the given company. """
 
-    def get_all_objects(self, company_id: int, category_id: int | None, amount: int = -1) -> list[Service]:
+    def get_all_objects(self, company_id: int, category_id: int | None = None, amount: int = -1) -> list[Service]:
         """
         Получает список услуг, относящихся к данной категории.
 

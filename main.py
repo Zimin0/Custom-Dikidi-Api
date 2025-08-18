@@ -1,105 +1,64 @@
-import sys
-from entities.companies import Company
+from services.company.service import CompanyService
+from services.parsing_services_service import ParsingServicesService
+from utils import DikidiApiClient
 
-from logger_init import logger
+def user_scenario_1():
+    """ 
+    UserScenario №1
+    1) I'm searching a company by its ID.
+    2) I want to see information about the company.
+    3) I want to see all the services of the company.
+    """
+    company_id = 511357
+    dkd_client = DikidiApiClient()
+    company_services = CompanyService(client=dkd_client)
 
-def select_option(options, prompt="Выберите вариант"):
-    """Отображает список вариантов и запрашивает выбор пользователя."""
-    if not options:
-        print("Нет доступных вариантов.")
-        return None
+    service_parser = ParsingServicesService(client=dkd_client)
+
+    company = company_services.get_by_id(company_id)
+    print(company.print_short())
     
-    for i, option in enumerate(options, 1):
-        print(f"{i}. {option}")
+    all_services = service_parser.get_all_objects(company.id)
+    print(f"Found {len(all_services)} services:")
+    for serv in all_services:
+        print(serv.print_short())
 
-    while True:
-        try:
-            choice = int(input(f"{prompt} (1-{len(options)}): "))
-            if 1 <= choice <= len(options):
-                return options[choice - 1]
-            print("Ошибка: Введите число из списка.")
-        except ValueError:
-            print("Ошибка: Введите число.")
+def user_scenario_2():
+    """
+    UserScenario №2
+    1) I'm searching a company by its name.
+    2) I choose from the provided filtered options.
+    """
+    company_query = "кот"
+    dkd_client = DikidiApiClient()
+    company_services = CompanyService(client=dkd_client)
 
-def main():
-    company_id = 1554154
-    
+    list_of_companies = company_services.search_by_name(company_query)
+    print(f"Filtered {list_of_companies} companies.")
 
-    # company_id = input("Введите ID компании: ") or "1554154" #or "550001"
-    
-    # # Создание объекта компании
-    # company = Company(id=int(company_id))
-    # print(f"Парсим информацию о компании с id '{company_id}'...")
-    # company.parse_company_info()
+def user_scenario_3():
+    """ 
+    ## UserScenario №3
+    1) Parse Company by link to its page (f.e.: https://dikidi.net/ru/1642062?p=0.pi)
+    2) I want to see information about the company.
+    """
+    links = [
+        'https://dikidi.ru/ru/profile/zoosalon_foks_kommuny_59_511357',
+        'https://dikidi.ru/ru/profile/511357',
+        'https://dikidi.ru/ru/511357?p=0.pi',
+        'https://dikidi.ru/ru/511357',
+        'https://dikidi.net/en/511357',
+    ]
 
-    # print(f"Компания: {company.name}")
-    
-    # # Получение списка категорий
-    # print("Загружаем категории...")
-    # categories = company.get_its_categories()
-    # if not categories:
-    #     print("Категории не найдены.")
-    #     sys.exit(1)
+    dkd_client = DikidiApiClient()
+    company_services = CompanyService(client=dkd_client)
 
-    # selected_category = select_option(categories, "Выберите категорию")
-    # if not selected_category:
-    #     sys.exit(1)
-
-    # print(f"Выбрана категория: {selected_category.name}")
-
-    # # Получение списка сервисов
-    # print("Загружаем услуги...")
-    # services = selected_category.get_its_services(company.id)
-    # if not services:
-    #     print("Услуги не найдены.")
-    #     sys.exit(1)
-
-    # selected_service = select_option(services, "Выберите услугу")
-    # if not selected_service:
-    #     sys.exit(1)
-
-    # print(f"Выбрана услуга: {selected_service.name}")
-
-    # # Получение списка мастеров
-    # print("Загружаем мастеров...")
-    # masters = selected_service.get_its_masters(company.id)
-    # if not masters:
-    #     print("Мастера не найдены.")
-    #     sys.exit(1)
-
-    # selected_master = select_option(masters, "Выберите мастера")
-    # if not selected_master:
-    #     sys.exit(1)
-
-    # print(f"Выбран мастер: {selected_master.username}")
-
-    # # Получение доступных дат
-    # print("Загружаем доступные даты...")
-    # dates = selected_master.get_its_dates(company.id, selected_service.id)
-    # logger.debug(f"{dates=}")
-    # if not dates:
-    #     print("Доступных дат нет.")
-    #     sys.exit(1)
-    
-    # selected_date = select_option(dates, "Выберите дату")
-    # if not selected_date:
-    #     sys.exit(1)
-
-    # print(f"Выбрана дата: {selected_date}")
-    
-    # # Получение доступных временных интервалов
-    # print("Загружаем доступные временные интервалы...")
-    # times = selected_date.get_its_times(company.id, selected_service.id, selected_master.id)
-    # if not times:
-    #     print("Нет доступных временных интервалов.")
-    #     sys.exit(1)
-
-    # selected_time = select_option(times, "Выберите время")
-    # if not selected_time:
-    #     sys.exit(1)
-
-    # print(f"Выбран временной интервал: {selected_time}")
-    # print("\Просмотр завершен!\n")
+    for link in links:
+        print("Processing link:", link)
+        company = company_services.get_by_link(link)
+        print("Parsed Company with ID =", company.id)       
 
 if __name__ == "__main__":
-    main()
+    user_scenario_1()
+    user_scenario_2()
+    user_scenario_3()
