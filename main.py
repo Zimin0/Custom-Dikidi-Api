@@ -1,5 +1,5 @@
 from services.company.service import CompanyService
-from services.parsing_services_service import ParsingServicesService
+from services.service.parsing_services_service import ParsingServicesService
 from utils import DikidiApiClient
 
 def user_scenario_1():
@@ -62,3 +62,4 @@ if __name__ == "__main__":
     user_scenario_1()
     user_scenario_2()
     user_scenario_3()
+    
