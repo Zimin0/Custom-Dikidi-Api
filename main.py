@@ -1,5 +1,8 @@
 from services.company.service import CompanyService
 from services.service.parsing_services_service import ParsingServicesService
+from services.booking.service import BookingService
+from entities.datetime_slot import DateTimeSlot
+from entities.users import DikidiUser
 from utils import DikidiApiClient
 
 def user_scenario_1():
@@ -57,9 +60,32 @@ def user_scenario_3():
         print("Processing link:", link)
         company = company_services.get_by_link(link)
         print("Parsed Company with ID =", company.id)       
+    
+def user_scenario_4():
+    """
+    ## UserScenario №4 
+    1) Choose required company by its link.
+    2) Choose Service, Master, TimeSlot.
+    3) Book it and get information about committed booking.
+    """
+    dkd_client = DikidiApiClient()
+    booking_service = BookingService(client=dkd_client)
+    booking_service.book(
+        company_id=517955, 
+        service_id=8384102, 
+        master_id=1983880,
+        time_slot=DateTimeSlot("2025-09-14 18:00:00"),
+        user=DikidiUser(
+            first_name="Елена",
+            last_name="",
+            phone="79172544894"
+            )
+        )
+
 
 if __name__ == "__main__":
-    user_scenario_1()
-    user_scenario_2()
-    user_scenario_3()
+    # user_scenario_1()
+    # user_scenario_2()
+    # user_scenario_3()
+    user_scenario_4()
     

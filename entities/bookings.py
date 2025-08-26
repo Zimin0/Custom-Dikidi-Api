@@ -1,12 +1,14 @@
 from dataclasses import dataclass
-from datetime_slot import DateTimeSlot
-from users import DikidiUser
+
+from entities.datetime_slot import DateTimeSlot
+from entities.users import DikidiUser
 
 @dataclass
-class Booking:
+class BookingData:
     session_hash: str
-    company_id: int
-    service_id: int
-    master_id: int
+    company_id: str
+    service_id: str
+    master_id: str
     time_slot: DateTimeSlot
     user: DikidiUser
+
