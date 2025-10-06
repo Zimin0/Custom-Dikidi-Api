@@ -21,7 +21,7 @@ class ParsingMastersService(IParsingService):
 
         URL = "{base_url}/service_info/?company_id={company_id}&service_id={service_id}&lang=ru"
         result_url = URL.format(base_url=self.client.URL, company_id=company_id, service_id=service_id)
-        logger.debug(f"URL for parsing categories(company_id={company_id}: {result_url}")
+        logger.debug(f"URL for parsing masters(company_id={company_id}: {result_url}")
 
         json_data = self.client.get_data_from_api(result_url)
 

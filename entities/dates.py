@@ -21,6 +21,14 @@ class Date:
     # these attributes must be collected separately.
     slots: list[DateTimeSlot] = field(default_factory=list)
 
+    def __hash__(self):
+        return hash(self.date_string)
+    
+    def __eq__(self, value) -> bool:
+        if not isinstance(value, Date):
+            return NotImplemented
+        return self.date_string == value.date_string
+
     def __post_init__(self):
         date_str_format = "%Y-%m-%d"   
         try:

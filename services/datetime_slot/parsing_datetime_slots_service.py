@@ -7,13 +7,14 @@ from services.interfaces import IParsingService
 class ParsingSlotsService(IParsingService):
     """ Requests the available time intervals for the specified date for the certain "master" and "service". """
     
-    def get_all_objects(self, date: Date, company_id: int, service_id: int,  master_id: int) -> list[DateTimeSlot]:
+    def get_all_objects(self, company_id: int, service_id: int, master_id: int, date: Date) -> list[DateTimeSlot]:
         """
         Args:
             date (Date): date object
             company_id (int): Company ID.
             service_id (int): Service ID.
             master_id (int): Master ID.
+            filter_date (Date): filters slots according to this date.
 
         Returns:
             list[str]: List of available "DateTimeSlots". 

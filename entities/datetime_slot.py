@@ -19,4 +19,21 @@ class DateTimeSlot:
         try:
             datetime.strptime(self.slot_str, dt_format)
         except ValueError:
-            raise ValueError(f"Time slot must satisfy the '{dt_format}' format")    
+            raise ValueError(f"Time slot must satisfy the '{dt_format}' format")
+    
+    def __str__(self) -> str:
+        return self.slot_str
+    
+    def get_date(self) -> str:
+        """Get date from self.slot_str."""
+        date_pattern = r"^([%\w\-]+)"
+        date_match = re.search(date_pattern, self.slot_str)
+        if date_match:
+            return date_match.group(1)
+
+    def get_time(self) -> str:
+        """Get time from self.slot_str."""
+        time_pattern = r"([%\w:]+)$"
+        time_match = re.search(time_pattern, self.slot_str)
+        if time_match:
+            return time_match.group(1)

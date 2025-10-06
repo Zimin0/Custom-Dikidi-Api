@@ -9,6 +9,6 @@ class BookingData:
     company_id: str
     service_id: str
     master_id: str
-    time_slot: DateTimeSlot
+    time_slot: str
     user: DikidiUser
 

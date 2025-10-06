@@ -1,7 +1,10 @@
 from dataclasses import dataclass
+from typing import Optional
 
 @dataclass
 class DikidiUser:
-    first_name: str
-    last_name: str
     phone: str
+    password: str
+    first_name: str
+    last_name: Optional[str] = None 
+
